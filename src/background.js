@@ -1,9 +1,11 @@
 'use strict'
 
-import { app, protocol, BrowserWindow } from 'electron'
+import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import { autoUpdater } from "electron-updater"
+autoUpdater.autoDownload = true
+autoUpdater.autoInstallOnAppQuit = true
 import path from 'path'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
@@ -12,6 +14,10 @@ const isDevelopment = process.env.NODE_ENV !== 'production'
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
 ])
+
+ipcMain.on('custom-event', () => {
+  autoUpdater.checkForUpdates().then(() => console.log('check update')).catch((error) => console.log('error t', error));
+});
 
 async function createWindow() {
   // Create the browser window.
@@ -32,14 +38,31 @@ async function createWindow() {
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
     await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
-    if (!process.env.IS_TEST) win.webContents.openDevTools()
+    win.webContents.openDevTools()
   } else {
     createProtocol('app')
     // Load the index.html when not in development
     win.loadURL('app://./index.html')
-    autoUpdater.checkForUpdatesAndNotify()
   }
 }
+
+autoUpdater.on('error', (error) => {
+  console.log('error', error);
+});
+
+autoUpdater.on('update-not-available', () => {
+  console.log('update-not-available');
+});
+
+autoUpdater.on('update-available', () => {
+  console.log('update-available');
+  autoUpdater.downloadUpdate()
+});
+
+autoUpdater.on('update-downloaded', ()=> {
+  console.log('update-downloaded');
+  autoUpdater.quitAndInstall();
+});
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {

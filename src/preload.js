@@ -7,6 +7,10 @@ contextBridge.exposeInMainWorld('electron', {
     startDrag: (fileName) => {
         ipcRenderer.send('ondragstart', path.join(process.cwd(), fileName))
     },
+    askForUpdate: () => {
+        console.log('entro');
+        ipcRenderer.send('custom-event');
+    },
     saveConfig: (info) => {
         try{
             const filePath = path.join(homedir, 'Desktop', 'config_crewroom.json');

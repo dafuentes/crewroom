@@ -38,6 +38,7 @@ export default {
       listCountries: [],
       images: [],
       messageError: null,
+      polling: null,
     };
   },
   async mounted() {
@@ -64,7 +65,15 @@ export default {
       }
     }
   },
+  created() {
+    this.checkUpdateApp();
+  },
   methods: {
+    checkUpdateApp() {
+      this.polling = setInterval(() => {
+        window.electron.askForUpdate();
+      }, 300000);
+    },
     readConfig: function () {
       const resultConfig = window.electron.readConfig();
       const currentLocation = JSON.parse(resultConfig);
