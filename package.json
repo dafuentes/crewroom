@@ -1,6 +1,6 @@
 {
   "name": "crewroom",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": {
     "name": "Dario Fuentes - McDonald's",
     "email": "dario.fuenes@mcd.com.gt"
@@ -11,7 +11,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "electron:build": "vue-cli-service electron:build --linux",
+    "electron:build": "vue-cli-service electron:build -- --linux -p always",
     "electron:serve": "vue-cli-service electron:serve",
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps"
@@ -23,6 +23,7 @@
     "autoprefixer": "^9",
     "axios": "^0.21.1",
     "core-js": "^3.6.5",
+    "electron-updater": "^4.3.9",
     "postcss": "^7",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.2",
     "vue": "^2.6.11"
