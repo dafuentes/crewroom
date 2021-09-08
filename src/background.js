@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, ipcMain } from 'electron'
+import { app, protocol, BrowserWindow, ipcMain, Notification } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import { autoUpdater } from "electron-updater"
@@ -9,6 +9,11 @@ autoUpdater.autoInstallOnAppQuit = true
 import path from 'path'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
+const NOTIFICATION_TITLE = 'Basic Notification'
+
+function showNotification (info) {
+  new Notification({ title: NOTIFICATION_TITLE, body: info }).show()
+}
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -16,15 +21,17 @@ protocol.registerSchemesAsPrivileged([
 ])
 
 ipcMain.on('custom-event', () => {
-  autoUpdater.checkForUpdates().then(() => console.log('check update')).catch((error) => console.log('error t', error));
+  autoUpdater.checkForUpdates().then(() => console.log('check update')).catch((error) => showNotification(error.toString()));
 });
 
 async function createWindow() {
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 1920,
-    height: 1080,
-    fullscreen: true,
+    width: 800,
+    height: 600,
+    // width: 1920,
+    // height: 1080,
+    // fullscreen: true,
     webPreferences: {
       
       // Use pluginOptions.nodeIntegration, leave this alone
@@ -43,24 +50,29 @@ async function createWindow() {
     createProtocol('app')
     // Load the index.html when not in development
     win.loadURL('app://./index.html')
+    win.webContents.openDevTools()
   }
 }
 
 autoUpdater.on('error', (error) => {
   console.log('error', error);
+  showNotification(error.toString());
 });
 
 autoUpdater.on('update-not-available', () => {
   console.log('update-not-available');
+  showNotification('update-not-available');
 });
 
 autoUpdater.on('update-available', () => {
   console.log('update-available');
+  showNotification('update-available');
   autoUpdater.downloadUpdate()
 });
 
 autoUpdater.on('update-downloaded', ()=> {
   console.log('update-downloaded');
+  showNotification('update-downloaded')
   autoUpdater.quitAndInstall();
 });
 
