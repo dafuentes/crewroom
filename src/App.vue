@@ -12,11 +12,7 @@
         />
       </div>
       <div v-else>
-        <home
-          :restaurant="infoRestaurant"
-          :error="messageError"
-          :images="images"
-        />
+        <welcome />
       </div>
     </div>
   </div>
@@ -26,13 +22,13 @@
 import axios from "axios";
 import Loading from "./components/Loading";
 import Configuration from "./components/Configuration";
-import Home from "./components/Home";
+import Welcome from "./components/Welcome";
 export default {
   name: "App",
   components: {
     Loading,
     Configuration,
-    Home,
+    Welcome,
   },
   data() {
     return {

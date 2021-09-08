@@ -10,7 +10,11 @@ import path from 'path'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 const NOTIFICATION_TITLE = 'Basic Notification'
+let win;
 
+function sendStatusToWindow(text) {
+  win.webContents.send('message', text);
+}
 function showNotification (info) {
   new Notification({ title: NOTIFICATION_TITLE, body: info }).show()
 }
@@ -21,12 +25,12 @@ protocol.registerSchemesAsPrivileged([
 ])
 
 ipcMain.on('custom-event', () => {
-  autoUpdater.checkForUpdates().then(() => console.log('check update')).catch((error) => showNotification(error.toString()));
+  autoUpdater.checkForUpdates().then(() => sendStatusToWindow('checkForUpdates Success')).catch((error) => sendStatusToWindow(`error ${error.toString()} `));
 });
 
 async function createWindow() {
   // Create the browser window.
-  const win = new BrowserWindow({
+  win = new BrowserWindow({
     width: 800,
     height: 600,
     // width: 1920,
@@ -57,22 +61,26 @@ async function createWindow() {
 autoUpdater.on('error', (error) => {
   console.log('error', error);
   showNotification(error.toString());
+  sendStatusToWindow(error.toString())
 });
 
 autoUpdater.on('update-not-available', () => {
   console.log('update-not-available');
   showNotification('update-not-available');
+  sendStatusToWindow('update-not-available')
 });
 
 autoUpdater.on('update-available', () => {
   console.log('update-available');
   showNotification('update-available');
+  sendStatusToWindow('update-available')
   autoUpdater.downloadUpdate()
 });
 
 autoUpdater.on('update-downloaded', ()=> {
   console.log('update-downloaded');
   showNotification('update-downloaded')
+  sendStatusToWindow('update-downloaded')
   autoUpdater.quitAndInstall();
 });
 
