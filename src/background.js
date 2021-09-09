@@ -4,17 +4,11 @@ import { app, protocol, BrowserWindow, ipcMain, Notification } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import { autoUpdater } from "electron-updater"
-autoUpdater.autoDownload = true
-autoUpdater.autoInstallOnAppQuit = true
+autoUpdater.autoDownload = false
 import path from 'path'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 const NOTIFICATION_TITLE = 'Basic Notification'
-let win;
-
-function sendStatusToWindow(text) {
-  win.webContents.send('message', text);
-}
 function showNotification (info) {
   new Notification({ title: NOTIFICATION_TITLE, body: info }).show()
 }
@@ -25,12 +19,12 @@ protocol.registerSchemesAsPrivileged([
 ])
 
 ipcMain.on('custom-event', () => {
-  autoUpdater.checkForUpdates().then(() => sendStatusToWindow('checkForUpdates Success')).catch((error) => sendStatusToWindow(`error ${error.toString()} `));
+  autoUpdater.checkForUpdates().then(() => showNotification('checkForUpdates Success')).catch((error) => showNotification(`error ${error.toString()} `));
 });
 
 async function createWindow() {
   // Create the browser window.
-  win = new BrowserWindow({
+  const win = new BrowserWindow({
     width: 800,
     height: 600,
     // width: 1920,
@@ -61,27 +55,35 @@ async function createWindow() {
 autoUpdater.on('error', (error) => {
   console.log('error', error);
   showNotification(error.toString());
-  sendStatusToWindow(error.toString())
 });
 
 autoUpdater.on('update-not-available', () => {
   console.log('update-not-available');
   showNotification('update-not-available');
-  sendStatusToWindow('update-not-available')
 });
 
 autoUpdater.on('update-available', () => {
   console.log('update-available');
   showNotification('update-available');
-  sendStatusToWindow('update-available')
-  autoUpdater.downloadUpdate()
+  autoUpdater.downloadUpdate().then(() => {
+    showNotification('update-downloaded')
+    console.log('wait for post download operation');
+  }).catch(downloadError => {
+    showNotification('downloadError')
+    console.error(downloadError);
+  });
 });
 
-autoUpdater.on('update-downloaded', ()=> {
-  console.log('update-downloaded');
-  showNotification('update-downloaded')
-  sendStatusToWindow('update-downloaded')
-  autoUpdater.quitAndInstall();
+// autoUpdater.on('update-downloaded', () => {
+//   console.log('update-downloaded');
+//   showNotification('update-downloaded')
+//   setTimeout(() => {
+//     autoUpdater.quitAndInstall();
+//   }, 6000);
+// });
+
+autoUpdater.on('update-downloaded', () => {
+  autoUpdater.quitAndInstall(true, true);
 });
 
 // Quit when all windows are closed.

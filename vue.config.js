@@ -6,7 +6,7 @@ module.exports = {
           publish: [{
             "provider": "generic",
             "url": "https://crewroom.mcdgente.com/releases/"
-          }]
+          }],
         }
       }
     }
