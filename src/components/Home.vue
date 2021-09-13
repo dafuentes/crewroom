@@ -59,7 +59,7 @@ export default {
       const _that = this;
       this.polling = setInterval(() => {
         _that.loadContent(_that.restaurant);
-      }, 120000);
+      }, 600000);
     },
     async loadContent(info) {
       try {

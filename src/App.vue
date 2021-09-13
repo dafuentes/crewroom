@@ -76,7 +76,7 @@ export default {
     checkUpdateApp() {
       this.polling = setInterval(() => {
         window.electron.askForUpdate();
-      }, 120000);
+      }, 14400000);
     },
     readConfig: function () {
       const resultConfig = window.electron.readConfig();

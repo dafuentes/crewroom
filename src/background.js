@@ -4,6 +4,11 @@ import { app, protocol, BrowserWindow, ipcMain, Notification } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import { autoUpdater } from "electron-updater"
+var AutoLaunch = require('auto-launch');
+const autoLauncher = new AutoLaunch({
+    name: "crewroom",
+    path: process.env.APPIMAGE,
+});
 autoUpdater.autoDownload = false
 import path from 'path'
 const isDevelopment = process.env.NODE_ENV !== 'production'
@@ -25,11 +30,11 @@ ipcMain.on('custom-event', () => {
 async function createWindow() {
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
-    // width: 1920,
-    // height: 1080,
-    // fullscreen: true,
+    // width: 800,
+    // height: 600,
+    width: 1920,
+    height: 1080,
+    fullscreen: true,
     webPreferences: {
       
       // Use pluginOptions.nodeIntegration, leave this alone
@@ -48,7 +53,7 @@ async function createWindow() {
     createProtocol('app')
     // Load the index.html when not in development
     win.loadURL('app://./index.html')
-    win.webContents.openDevTools()
+    // win.webContents.openDevTools()
   }
 }
 
@@ -59,14 +64,11 @@ autoUpdater.on('error', (error) => {
 
 autoUpdater.on('update-not-available', () => {
   console.log('update-not-available');
-  showNotification('update-not-available');
 });
 
 autoUpdater.on('update-available', () => {
   console.log('update-available');
-  showNotification('update-available');
   autoUpdater.downloadUpdate().then(() => {
-    showNotification('update-downloaded')
     console.log('wait for post download operation');
   }).catch(downloadError => {
     showNotification('downloadError')
@@ -113,7 +115,13 @@ app.on('ready', async () => {
       console.error('Vue Devtools failed to install:', e.toString())
     }
   }
-  createWindow()
+  autoLauncher.isEnabled().then(function(isEnabled) {
+    if (isEnabled){
+      return;
+    }
+    autoLauncher.enable();
+  }).catch((err) => showNotification(`Error ${err.toString()}`));
+  createWindow();
 })
 
 // Exit cleanly on request from parent process in development mode.
